@@ -1,33 +1,42 @@
 <?php
 /**
- * PROJECT: SkillLink
- * FILE: config.php
- * PURPOSE: Global Constants & Environment Settings
+ * PROJECT: SkillLink - The Professional Marketplace
+ * FILE: includes/config.php
+ * PURPOSE: Central System Constants & DB Connection Protocol
+ * REFINEMENTS: Added Brand & Route Constants to support Header Logic.
  */
 
-// 1. ERROR REPORTING
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// 1. Database Credentials (Standard XAMPP Defaults)
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', ''); 
+define('DB_NAME', 'skilllink_db');
 
-// 2. SITE IDENTITY
+// 2. Branding & Navigation Nodes (Required by your Header)
+// These constants allow your header.php to render without fatal errors.
+define('BRAND_COLOR', '#3b82f6'); // The specific SkillLink Blue hex code
 define('SITE_NAME', 'SkillLink');
-define('BRAND_COLOR', '#0056d2'); 
-
-// 3. PATH MANAGEMENT
 define('BASE_URL', 'http://localhost/skilllink/');
 
-// 4. DATABASE CREDENTIALS
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'skilllink_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// 3. Establishing the Connection Node
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
-// 5. USER ROLES
-define('ROLE_CLIENT', 'client');
-define('ROLE_WORKER', 'worker');
-define('ROLE_ADMIN', 'admin');
+// 4. Connection Protocol Check
+if ($conn->connect_error) {
+    // Stops execution if the database is unreachable
+    die("Critical Error: Database connection failed. " . $conn->connect_error);
+}
 
-/* Note: We purposefully leave out the closing PHP tag below 
-   to prevent accidental whitespace from causing header errors. 
-*/
+// 5. Set Charset for Elite Character Support
+// Essential for correctly storing Kenyan names and localized data.
+$conn->set_charset("utf8mb4");
+
+/**
+ * 🧪 DEVELOPMENT DEBUGGING PROTOCOL
+ * Keep these ON during this build phase to see errors instead of a blank screen.
+ */
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// The connection variable $conn is now globally available to your process files.
+?>
