@@ -3,7 +3,6 @@
  * PROJECT: SkillLink - The Professional Marketplace
  * FILE: auth/login.php
  * PURPOSE: Inclusive, High-Fidelity Login Gate for Workers & Clients
- * REFINEMENTS: Universal Wording, High-Contrast Labels, and Mass-Weighted Buttons.
  */
 
 // 1. System Initialization
@@ -15,7 +14,12 @@ if (file_exists($include_path . 'config.php')) {
     die("Critical Error: Core configuration missing.");
 }
 
-// 2. Component Loading
+// 2. State Detection (Variables kept for future use, but banners removed)
+$logout_success = isset($_GET['logout']) && $_GET['logout'] === 'success';
+$signup_success = isset($_GET['signup']) && $_GET['signup'] === 'success';
+$error_creds    = isset($_GET['error']) && $_GET['error'] === 'invalid_credentials';
+
+// 3. Component Loading
 $current_page = 'login';
 include $include_path . 'header.php';
 ?>
@@ -80,16 +84,13 @@ include $include_path . 'header.php';
 
         <div class="mt-8 text-center">
             <p class="text-slate-400 text-[11px] font-[900] uppercase tracking-[0.3em] flex items-center justify-center gap-3">
-                Don't have an account? <a href="signup.php" class="text-skill-blue hover:text-blue-600 underline decoration-2 underline-offset-8 transition-all font-black">Sign Up</a>
+                Don't have an account? <a href="../signup-choice.php" class="text-skill-blue hover:text-blue-600 underline decoration-2 underline-offset-8 transition-all font-black">Sign Up</a>
             </p>
         </div>
     </div>
 </main>
 
 <script>
-    /**
-     * HAPTIC TOGGLE: Swaps password visibility for accessibility
-     */
     function togglePass() {
         const input = document.getElementById('loginPassword');
         const icon = document.getElementById('eyeIcon');
