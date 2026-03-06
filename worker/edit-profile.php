@@ -103,7 +103,7 @@ $active_status = isset($_GET['status']) && isset($status_map[$_GET['status']]) ?
                     <a href="manage-tasks.php" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:bg-slate-50 rounded-2xl font-bold text-sm transition-all">
                         <i class="fas fa-list-check text-xs"></i> Active Tasks
                     </a>
-                    <a href="#" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:bg-slate-50 rounded-2xl font-bold text-sm transition-all">
+                    <a href="earnings.php" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:bg-slate-50 rounded-2xl font-bold text-sm transition-all">
                         <i class="fas fa-wallet text-xs"></i> Earnings
                     </a>
                     <a href="edit-profile.php" class="bg-slate-50 text-skill-blue border-r-4 border-skill-blue flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all">

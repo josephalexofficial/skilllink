@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 05, 2026 at 09:07 PM
+-- Generation Time: Mar 06, 2026 at 09:46 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,6 +47,40 @@ INSERT INTO `categories` (`id`, `cat_name`, `cat_icon`, `sort_order`, `status`, 
 (4, 'Carpentry', 'fa-hammer', 4, 'active', '2026-03-05 14:56:05'),
 (5, 'Cleaning', 'fa-sparkles', 5, 'active', '2026-03-05 14:56:05'),
 (6, 'Appliances', 'fa-gears', 6, 'active', '2026-03-05 14:56:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tasks`
+--
+
+CREATE TABLE `tasks` (
+  `id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `worker_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `location_name` varchar(255) NOT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `budget` decimal(10,2) DEFAULT 0.00,
+  `budget_type` enum('fixed','negotiable') DEFAULT 'fixed',
+  `status` enum('open','assigned','in_progress','completed','cancelled') DEFAULT 'open',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tasks`
+--
+
+INSERT INTO `tasks` (`id`, `client_id`, `category_id`, `worker_id`, `title`, `description`, `location_name`, `latitude`, `longitude`, `budget`, `budget_type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 10, 2, 2, 'Fix  Electronic (Fridge)', 'Fix  Electronic (Fridge)', 'Nairobi', NULL, NULL, 500.00, 'negotiable', 'completed', '2026-03-06 08:21:37', '2026-03-06 15:02:04'),
+(2, 10, 4, NULL, 'Bed fixing', 'I want the bed fixed on the edges', 'Kisumu', NULL, NULL, 1000.00, 'negotiable', 'open', '2026-03-06 08:47:23', '2026-03-06 08:47:23'),
+(3, 10, 3, NULL, 'Wall Painting', 'Panting of  a 6 Feet Wall', 'Nakuru', NULL, NULL, 2000.00, 'fixed', 'open', '2026-03-06 08:50:41', '2026-03-06 08:50:41'),
+(4, 10, 6, 13, 'Appliance Connection and Fixing', 'Fixing of my expensive television which i bought with my own Money', 'Siaya', NULL, NULL, 1500.00, 'fixed', 'completed', '2026-03-06 08:53:23', '2026-03-06 13:43:54'),
+(5, 1, 1, NULL, 'Tap Fixing', 'Fixing of a Tap', 'Machakos', NULL, NULL, 3000.00, 'negotiable', 'open', '2026-03-06 09:26:51', '2026-03-06 09:26:51');
 
 -- --------------------------------------------------------
 
@@ -131,6 +165,15 @@ ALTER TABLE `categories`
   ADD UNIQUE KEY `cat_name` (`cat_name`);
 
 --
+-- Indexes for table `tasks`
+--
+ALTER TABLE `tasks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_client` (`client_id`),
+  ADD KEY `fk_category` (`category_id`),
+  ADD KEY `fk_worker` (`worker_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -156,6 +199,12 @@ ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `tasks`
+--
+ALTER TABLE `tasks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -170,6 +219,14 @@ ALTER TABLE `worker_profiles`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `tasks`
+--
+ALTER TABLE `tasks`
+  ADD CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
+  ADD CONSTRAINT `fk_client` FOREIGN KEY (`client_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_worker` FOREIGN KEY (`worker_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `worker_profiles`
