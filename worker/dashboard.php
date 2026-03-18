@@ -2,7 +2,7 @@
 /**
  * PROJECT: SkillLink - The Professional Marketplace
  * FILE: worker/dashboard.php
- * PURPOSE: Elite Worker Command Center - Live Opportunity Feed, Success Pulse & Dynamic Ledger
+ * PURPOSE: Elite Worker Command Center - Live Opportunity Feed, Success Pulse & Reputation Engine
  */
 
 session_start();
@@ -40,15 +40,31 @@ $opportunities_query = $conn->query("SELECT t.*, c.cat_name
                                      ORDER BY t.created_at DESC 
                                      LIMIT 5");
 
-// 5. NEW: The Financial Pulse (Dynamic Ledger)
-// Surgical fetch of completed missions and total withdrawable earnings
+// 5. SURGICAL UPDATE: Financial & Success Pulse
+// Stats now include both 'completed' and 'finalized' missions
 $stats_query = $conn->query("SELECT 
                                 COUNT(id) AS total_tasks_finished, 
                                 IFNULL(SUM(budget), 0) AS total_earnings 
                              FROM tasks 
                              WHERE worker_id = '$user_id' 
-                             AND status = 'completed'");
+                             AND status IN ('completed', 'finalized')");
 $stats = $stats_query->fetch_assoc();
+
+// New: Reputation Registry Pulse
+$rep_query = $conn->query("SELECT 
+                             IFNULL(AVG(rating), 0) AS avg_rating,
+                             COUNT(id) AS review_count
+                           FROM reviews 
+                           WHERE worker_id = '$user_id'");
+$rep = $rep_query->fetch_assoc();
+
+// New: Success Pulse (Latest Accolades)
+$accolades_query = $conn->query("SELECT r.*, u.full_name as client_name 
+                                 FROM reviews r 
+                                 JOIN users u ON r.client_id = u.id 
+                                 WHERE r.worker_id = '$user_id' 
+                                 ORDER BY r.created_at DESC 
+                                 LIMIT 3");
 
 $user_name = $_SESSION['full_name'];
 ?>
@@ -84,6 +100,13 @@ $user_name = $_SESSION['full_name'];
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.04); 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        /* RECESSED MATERIALITY */
+        .recessed-card { 
+            background: #fdfdfd; 
+            border: 1px solid rgba(0, 0, 0, 0.03); 
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+        }
         
         .active-nav { 
             background: white; 
@@ -92,14 +115,8 @@ $user_name = $_SESSION['full_name'];
             border-radius: 1.25rem;
         }
 
-        @keyframes toast-slide-in {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes toast-slide-out {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
+        @keyframes toast-slide-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toast-slide-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
         .toast-active { animation: toast-slide-in 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
         .toast-closing { animation: toast-slide-out 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
         
@@ -179,25 +196,28 @@ $user_name = $_SESSION['full_name'];
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                     <div class="elite-card p-8 rounded-[2.5rem] group hover:-translate-y-1">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Total Earnings</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Total Revenue</p>
                         <h3 class="text-3xl font-black text-slate-900 tracking-tight">Ksh <?php echo number_format($stats['total_earnings'], 2); ?></h3>
                         <div class="mt-4 inline-flex items-center gap-2 text-green-500 bg-green-50 px-3 py-1 rounded-full text-[9px] font-black uppercase">
                             <i class="fas fa-arrow-trend-up"></i> <?php echo ($stats['total_tasks_finished'] > 0) ? "Growth Active" : "0% Growth"; ?>
                         </div>
                     </div>
                     <div class="elite-card p-8 rounded-[2.5rem] group hover:-translate-y-1">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tasks Finished</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Missions Finalized</p>
                         <h3 class="text-3xl font-black text-slate-900 tracking-tight"><?php echo $stats['total_tasks_finished']; ?></h3>
                         <p class="mt-4 text-slate-400 font-bold text-[9px] uppercase tracking-widest italic">
-                            <?php echo ($stats['total_tasks_finished'] > 0) ? "Consistent Performer" : "Awaiting First Handshake"; ?>
+                            <?php echo ($stats['total_tasks_finished'] > 0) ? "Certified Success" : "Awaiting First Handshake"; ?>
                         </p>
                     </div>
                     <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
                         <div class="absolute -top-10 -right-10 w-32 h-32 bg-skill-blue/10 rounded-full blur-2xl"></div>
                         <div class="relative z-10">
                             <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Professional Score</p>
-                            <h3 class="text-3xl font-black flex items-center gap-3">5.0 <i class="fas fa-star text-amber-400 text-xl"></i></h3>
-                            <p class="mt-4 text-skill-blue font-black text-[9px] uppercase tracking-[0.2em]">Certified SkillLink Pro</p>
+                            <h3 class="text-3xl font-black flex items-center gap-3">
+                                <?php echo ($rep['avg_rating'] > 0) ? number_format($rep['avg_rating'], 1) : "5.0"; ?> 
+                                <i class="fas fa-star text-amber-400 text-xl"></i>
+                            </h3>
+                            <p class="mt-4 text-skill-blue font-black text-[9px] uppercase tracking-[0.2em]">Based on <?php echo $rep['review_count']; ?> Verified Handshakes</p>
                         </div>
                         <i class="fas fa-shield-check absolute -right-6 -bottom-6 text-9xl opacity-5 group-hover:scale-110 transition-transform duration-700"></i>
                     </div>
@@ -205,40 +225,72 @@ $user_name = $_SESSION['full_name'];
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div class="lg:col-span-2 space-y-8">
-                        <div class="flex items-center justify-between px-4">
-                            <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Opportunity Engine</h3>
-                            <div class="flex items-center gap-3"><span class="w-2 h-2 bg-skill-blue rounded-full animate-ping"></span><span class="text-skill-blue text-[9px] font-black uppercase tracking-widest">Scanning Local Leads</span></div>
-                        </div>
+                        
                         <div class="space-y-6">
-                            <?php if($opportunities_query->num_rows > 0): ?>
-                                <?php while($job = $opportunities_query->fetch_assoc()): ?>
-                                <div class="elite-card p-8 rounded-[3rem] flex items-center justify-between group new-job-glow hover:border-skill-blue/50 transition-all">
-                                    <div class="flex items-center gap-8">
-                                        <div class="w-16 h-16 bg-slate-50 rounded-[1.75rem] flex items-center justify-center text-slate-300 group-hover:text-skill-blue transition-colors"><i class="fas fa-bolt-lightning text-2xl"></i></div>
-                                        <div class="space-y-1">
-                                            <div class="flex items-center gap-3">
-                                                <span class="px-3 py-1 bg-skill-blue/10 text-skill-blue text-[9px] font-black uppercase rounded-full tracking-tighter"><?php echo $job['cat_name']; ?></span>
-                                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">• <?php echo date('h:i A', strtotime($job['created_at'])); ?></span>
+                            <div class="flex items-center justify-between px-4">
+                                <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Success Pulse</h3>
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Latest Client Accolades</span>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                <?php if($accolades_query->num_rows > 0): ?>
+                                    <?php while($review = $accolades_query->fetch_assoc()): ?>
+                                    <div class="recessed-card p-6 rounded-[2rem] flex items-center justify-between group">
+                                        <div class="flex items-center gap-6">
+                                            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-amber-400 shadow-sm border border-slate-50">
+                                                <i class="fas fa-star text-sm"></i>
                                             </div>
-                                            <h4 class="text-lg font-black text-slate-900 tracking-tight leading-tight"><?php echo $job['title']; ?></h4>
-                                            <div class="flex items-center gap-4 pt-1">
-                                                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest"><i class="fas fa-map-pin mr-1.5 text-skill-blue"></i> <?php echo $job['location_name']; ?></p>
-                                                <p class="text-xs text-slate-900 font-black uppercase tracking-widest"><i class="fas fa-wallet mr-1.5 text-skill-blue"></i> Ksh <?php echo number_format($job['budget'], 2); ?></p>
+                                            <div>
+                                                <p class="text-slate-900 font-black text-sm leading-tight italic">"<?php echo $review['comment']; ?>"</p>
+                                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Confirmed by <?php echo $review['client_name']; ?> • <?php echo date('M d, Y', strtotime($review['created_at'])); ?></p>
                                             </div>
                                         </div>
+                                        <span class="px-3 py-1 bg-green-50 text-green-600 text-[8px] font-black uppercase rounded-full border border-green-100">Verified</span>
                                     </div>
-                                    <a href="view-task.php?id=<?php echo $job['id']; ?>" class="px-8 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-skill-blue transition-all shadow-xl active:scale-95 inline-flex items-center justify-center">
-                                        Inspect Task <i class="fas fa-arrow-right ml-3"></i>
-                                    </a>
-                                </div>
-                                <?php endwhile; ?>
-                            <?php else: ?>
-                                <div class="bg-white rounded-[4rem] p-24 text-center border-4 border-dashed border-slate-100 group transition-all">
-                                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><i class="fas fa-satellite-dish text-slate-200 text-4xl animate-pulse"></i></div>
-                                    <h4 class="text-2xl font-black text-slate-900 tracking-tight">Listening for Requests...</h4>
-                                    <p class="text-sm text-slate-400 font-medium max-w-sm mx-auto mt-4 leading-relaxed">Jobs matching your <strong><?php echo $worker_data['cat_name']; ?></strong> skill in your region will appear here instantly.</p>
-                                </div>
-                            <?php endif; ?>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <div class="recessed-card p-10 rounded-[2rem] text-center border-2 border-dashed border-slate-100">
+                                        <p class="text-xs text-slate-400 font-black uppercase tracking-widest">Mission history currently in synchronization...</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6 pt-8">
+                            <div class="flex items-center justify-between px-4">
+                                <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Opportunity Engine</h3>
+                                <div class="flex items-center gap-3"><span class="w-2 h-2 bg-skill-blue rounded-full animate-ping"></span><span class="text-skill-blue text-[9px] font-black uppercase tracking-widest">Scanning Local Leads</span></div>
+                            </div>
+                            <div class="space-y-6">
+                                <?php if($opportunities_query->num_rows > 0): ?>
+                                    <?php while($job = $opportunities_query->fetch_assoc()): ?>
+                                    <div class="elite-card p-8 rounded-[3rem] flex items-center justify-between group new-job-glow hover:border-skill-blue/50 transition-all">
+                                        <div class="flex items-center gap-8">
+                                            <div class="w-16 h-16 bg-slate-50 rounded-[1.75rem] flex items-center justify-center text-slate-300 group-hover:text-skill-blue transition-colors"><i class="fas fa-bolt-lightning text-2xl"></i></div>
+                                            <div class="space-y-1">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="px-3 py-1 bg-skill-blue/10 text-skill-blue text-[9px] font-black uppercase rounded-full tracking-tighter"><?php echo $job['cat_name']; ?></span>
+                                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">• <?php echo date('h:i A', strtotime($job['created_at'])); ?></span>
+                                                </div>
+                                                <h4 class="text-lg font-black text-slate-900 tracking-tight leading-tight"><?php echo $job['title']; ?></h4>
+                                                <div class="flex items-center gap-4 pt-1">
+                                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest"><i class="fas fa-map-pin mr-1.5 text-skill-blue"></i> <?php echo $job['location_name']; ?></p>
+                                                    <p class="text-xs text-slate-900 font-black uppercase tracking-widest"><i class="fas fa-wallet mr-1.5 text-skill-blue"></i> Ksh <?php echo number_format($job['budget'], 2); ?></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a href="view-task.php?id=<?php echo $job['id']; ?>" class="px-8 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-skill-blue transition-all shadow-xl active:scale-95 inline-flex items-center justify-center">
+                                            Inspect Task <i class="fas fa-arrow-right ml-3"></i>
+                                        </a>
+                                    </div>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <div class="bg-white rounded-[4rem] p-24 text-center border-4 border-dashed border-slate-100 group transition-all">
+                                        <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><i class="fas fa-satellite-dish text-slate-200 text-4xl animate-pulse"></i></div>
+                                        <h4 class="text-2xl font-black text-slate-900 tracking-tight">Listening for Requests...</h4>
+                                        <p class="text-sm text-slate-400 font-medium max-w-sm mx-auto mt-4 leading-relaxed">Jobs matching your <strong><?php echo $worker_data['cat_name']; ?></strong> skill in your region will appear here instantly.</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
 

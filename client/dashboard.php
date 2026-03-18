@@ -26,15 +26,17 @@ $active_tasks_query = $conn->query("SELECT t.*, c.cat_name
                                     FROM tasks t 
                                     JOIN categories c ON t.category_id = c.id 
                                     WHERE t.client_id = '$user_id' 
-                                    AND t.status IN ('open', 'assigned', 'in_progress')
+                                    AND t.status IN ('open', 'assigned', 'in_progress', 'completed')
                                     ORDER BY t.created_at DESC");
 
-// Fetch Top Pros (Nationwide Context)
-$pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name 
+// 4. SURGICAL UPDATE: Fetch Top Pros with Real-Time Average Ratings
+$pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name,
+                            IFNULL((SELECT AVG(rating) FROM reviews WHERE worker_id = wp.user_id), 0) as avg_rating
                             FROM worker_profiles wp 
                             JOIN users u ON wp.user_id = u.id 
                             JOIN categories c ON wp.category_id = c.id 
                             WHERE wp.is_live = 1 
+                            ORDER BY avg_rating DESC
                             LIMIT 3");
 ?>
 
@@ -63,14 +65,12 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* ELITE MATERIAL SYSTEM */
         .elite-card { 
             background: white; 
             border: 1px solid rgba(255, 255, 255, 0.6); 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.04); 
         }
         
-        /* PULSING STATUS ANIMATION */
         @keyframes status-pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
         .status-searching { animation: status-pulse 2s infinite; }
         
@@ -100,10 +100,10 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name
                     <a href="post-job.php" class="flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-slate-900 transition-all rounded-2xl font-bold text-sm">
                         <i class="fas fa-plus-circle text-xs"></i> Launch Project
                     </a>
-                    <a href="#" class="flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-slate-900 transition-all rounded-2xl font-bold text-sm">
+                    <a href="my-bookings.php" class="flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-slate-900 transition-all rounded-2xl font-bold text-sm">
                         <i class="fas fa-calendar-check text-xs"></i> My Bookings
                     </a>
-                    <a href="#" class="flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-slate-900 transition-all rounded-2xl font-bold text-sm">
+                    <a href="activity-log.php" class="flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-slate-900 transition-all rounded-2xl font-bold text-sm">
                         <i class="fas fa-history text-xs"></i> Activity Log
                     </a>
                 </nav>
@@ -158,7 +158,7 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name
                     <div class="lg:col-span-2 space-y-8">
                         <div class="flex items-center justify-between px-4">
                             <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Active Bookings</h3>
-                            <a href="#" class="text-[10px] font-black text-skill-blue uppercase tracking-widest border-b-2 border-skill-blue/20 hover:border-skill-blue transition-all pb-1">View All Activity</a>
+                            <a href="my-bookings.php" class="text-[10px] font-black text-skill-blue uppercase tracking-widest border-b-2 border-skill-blue/20 hover:border-skill-blue transition-all pb-1">View All Activity</a>
                         </div>
                         
                         <div class="grid grid-cols-1 gap-6">
@@ -184,12 +184,12 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name
                                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Current Status</p>
                                             <div class="flex items-center gap-2">
                                                 <div class="w-2 h-2 bg-skill-blue rounded-full status-searching"></div>
-                                                <span class="text-[10px] font-black text-slate-900 uppercase tracking-widest"><?php echo strtoupper($task['status']); ?></span>
+                                                <span class="text-[10px] font-black text-slate-900 uppercase tracking-widest"><?php echo strtoupper(str_replace('_', ' ', $task['status'])); ?></span>
                                             </div>
                                         </div>
-                                        <button class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-xl hover:bg-skill-blue transition-all">
+                                        <a href="my-bookings.php" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-xl hover:bg-skill-blue transition-all">
                                             <i class="fas fa-chevron-right"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                                 <?php endwhile; ?>
@@ -202,7 +202,7 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name
                                         <h4 class="text-xl font-black text-slate-900">No Projects Launched</h4>
                                         <p class="text-sm text-slate-400 font-bold tracking-tight max-w-xs mx-auto">Engineer your first professional request and reach local pros across Kenya.</p>
                                     </div>
-                                    <a href="post-job.php" class="inline-flex items-center gap-4 px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-skill-blue transition-all shadow-2xl">
+                                    <a href="launch-project.php" class="inline-flex items-center gap-4 px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-skill-blue transition-all shadow-2xl">
                                         Launch New Project <i class="fas fa-plus"></i>
                                     </a>
                                 </div>
@@ -224,13 +224,17 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name
                                         <h5 class="text-base font-black text-slate-900 group-hover:text-skill-blue transition-colors"><?php echo $pro['full_name']; ?></h5>
                                         <div class="flex items-center gap-2 mt-1">
                                             <span class="bg-green-50 text-green-600 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter"><?php echo $pro['cat_name']; ?></span>
-                                            <span class="text-[10px] font-black text-slate-400"><i class="fas fa-star text-amber-400"></i> 5.0</span>
+                                            <span class="text-[10px] font-black text-slate-400">
+                                                <i class="fas fa-star text-amber-400"></i> 
+                                                <?php echo ($pro['avg_rating'] > 0) ? number_format($pro['avg_rating'], 1) : "New"; ?>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-skill-blue transition-all shadow-xl active:scale-95">
+                                <a href="view-worker.php?id=<?php echo $pro['user_id']; ?>" 
+                                   class="block w-full py-4 bg-slate-900 text-white rounded-2xl text-center font-black text-xs uppercase tracking-widest hover:bg-skill-blue transition-all shadow-xl active:scale-95">
                                     Consult Expert
-                                </button>
+                                </a>
                             </div>
                             <?php endwhile; ?>
                         </div>

@@ -105,10 +105,10 @@ $categories = $conn->query("SELECT * FROM categories WHERE status = 'active' ORD
                     <a href="post-job.php" class="active-nav flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-sm transition-all">
                         <i class="fas fa-plus-circle text-xs"></i> Launch Project
                     </a>
-                    <a href="#" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:text-skill-blue transition-all rounded-2xl font-bold text-sm">
+                    <a href="my-bookings.php" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:text-skill-blue transition-all rounded-2xl font-bold text-sm">
                         <i class="fas fa-calendar-check text-xs"></i> My Bookings
                     </a>
-                    <a href="#" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:text-skill-blue transition-all rounded-2xl font-bold text-sm">
+                    <a href="activity-log.php" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:text-skill-blue transition-all rounded-2xl font-bold text-sm">
                         <i class="fas fa-clock-rotate-left text-xs"></i> Activity Log
                     </a>
                 </nav>

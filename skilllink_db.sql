@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 06, 2026 at 09:46 PM
+-- Generation Time: Mar 18, 2026 at 10:27 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,12 +41,37 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `cat_name`, `cat_icon`, `sort_order`, `status`, `created_at`) VALUES
-(1, 'Plumbing', 'fa-faucet-drip', 1, 'active', '2026-03-05 14:56:05'),
+(1, 'Plumbing', 'fa-faucet-drip', 1, 'hidden', '2026-03-05 14:56:05'),
 (2, 'Electrical', 'fa-bolt-lightning', 2, 'active', '2026-03-05 14:56:05'),
 (3, 'Painting', 'fa-paint-roller', 3, 'active', '2026-03-05 14:56:05'),
 (4, 'Carpentry', 'fa-hammer', 4, 'active', '2026-03-05 14:56:05'),
 (5, 'Cleaning', 'fa-sparkles', 5, 'active', '2026-03-05 14:56:05'),
 (6, 'Appliances', 'fa-gears', 6, 'active', '2026-03-05 14:56:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `worker_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `rating` tinyint(1) NOT NULL CHECK (`rating` between 1 and 5),
+  `comment` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `task_id`, `worker_id`, `client_id`, `rating`, `comment`, `created_at`) VALUES
+(1, 7, 2, 10, 5, 'Perfect Work .\\r\\nArrival on time', '2026-03-18 05:19:54'),
+(2, 4, 13, 10, 5, 'Work Perfectly Done', '2026-03-18 06:01:15'),
+(3, 6, 2, 1, 5, 'Well done', '2026-03-18 06:43:29');
 
 -- --------------------------------------------------------
 
@@ -66,7 +91,7 @@ CREATE TABLE `tasks` (
   `longitude` decimal(11,8) DEFAULT NULL,
   `budget` decimal(10,2) DEFAULT 0.00,
   `budget_type` enum('fixed','negotiable') DEFAULT 'fixed',
-  `status` enum('open','assigned','in_progress','completed','cancelled') DEFAULT 'open',
+  `status` enum('open','assigned','in_progress','completed','finalized','cancelled') NOT NULL DEFAULT 'open',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -79,8 +104,10 @@ INSERT INTO `tasks` (`id`, `client_id`, `category_id`, `worker_id`, `title`, `de
 (1, 10, 2, 2, 'Fix  Electronic (Fridge)', 'Fix  Electronic (Fridge)', 'Nairobi', NULL, NULL, 500.00, 'negotiable', 'completed', '2026-03-06 08:21:37', '2026-03-06 15:02:04'),
 (2, 10, 4, NULL, 'Bed fixing', 'I want the bed fixed on the edges', 'Kisumu', NULL, NULL, 1000.00, 'negotiable', 'open', '2026-03-06 08:47:23', '2026-03-06 08:47:23'),
 (3, 10, 3, NULL, 'Wall Painting', 'Panting of  a 6 Feet Wall', 'Nakuru', NULL, NULL, 2000.00, 'fixed', 'open', '2026-03-06 08:50:41', '2026-03-06 08:50:41'),
-(4, 10, 6, 13, 'Appliance Connection and Fixing', 'Fixing of my expensive television which i bought with my own Money', 'Siaya', NULL, NULL, 1500.00, 'fixed', 'completed', '2026-03-06 08:53:23', '2026-03-06 13:43:54'),
-(5, 1, 1, NULL, 'Tap Fixing', 'Fixing of a Tap', 'Machakos', NULL, NULL, 3000.00, 'negotiable', 'open', '2026-03-06 09:26:51', '2026-03-06 09:26:51');
+(4, 10, 6, 13, 'Appliance Connection and Fixing', 'Fixing of my expensive television which i bought with my own Money', 'Siaya', NULL, NULL, 1500.00, 'fixed', 'finalized', '2026-03-06 08:53:23', '2026-03-18 06:01:15'),
+(5, 1, 1, NULL, 'Tap Fixing', 'Fixing of a Tap', 'Machakos', NULL, NULL, 3000.00, 'negotiable', 'open', '2026-03-06 09:26:51', '2026-03-06 09:26:51'),
+(6, 1, 2, 2, 'Laundry Machine Electronic Fixing', 'I want my laundry machine to be fixed electronically', 'Milimani', NULL, NULL, 3000.00, 'fixed', 'finalized', '2026-03-11 20:46:59', '2026-03-18 06:43:29'),
+(7, 10, 2, 2, 'Electronic Kettle Fixing', 'The charging part of the electronic kettle fixed', 'Siaya', NULL, NULL, 800.00, 'negotiable', 'finalized', '2026-03-11 20:54:01', '2026-03-18 05:19:54');
 
 -- --------------------------------------------------------
 
@@ -146,7 +173,7 @@ CREATE TABLE `worker_profiles` (
 --
 
 INSERT INTO `worker_profiles` (`profile_id`, `user_id`, `category_id`, `bio`, `profile_photo`, `onboarded_at`, `hourly_rate`, `service_radius`, `is_live`, `id_proof_path`, `is_verified`) VALUES
-(1, 2, 2, 'Certified Electrician Professional', 'pro_2_1772736276.jpg', '2026-03-05 15:25:39', 0.00, 10, 1, NULL, 0),
+(1, 2, 2, 'Certified Electrician Professional', 'pro_2_1772736276.jpg', '2026-03-05 15:25:39', 0.00, 10, 1, NULL, 1),
 (2, 11, 5, 'Certified Cleaner', 'default-pro.png', '2026-03-05 15:27:52', 0.00, 10, 1, NULL, 0),
 (3, 14, 4, 'Certified Carpenter', 'default-pro.png', '2026-03-05 16:20:25', 0.00, 10, 1, NULL, 0),
 (4, 13, 6, 'Certified in Appliances', 'pro_13_1772728203.jpg', '2026-03-05 16:30:03', 0.00, 10, 1, 'id_13_1772740899.pdf', 0),
@@ -163,6 +190,15 @@ INSERT INTO `worker_profiles` (`profile_id`, `user_id`, `category_id`, `bio`, `p
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `cat_name` (`cat_name`);
+
+--
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `task_id` (`task_id`),
+  ADD KEY `worker_id` (`worker_id`),
+  ADD KEY `client_id` (`client_id`);
 
 --
 -- Indexes for table `tasks`
@@ -199,10 +235,16 @@ ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -219,6 +261,14 @@ ALTER TABLE `worker_profiles`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`worker_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reviews_ibfk_3` FOREIGN KEY (`client_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `tasks`
