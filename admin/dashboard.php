@@ -190,7 +190,9 @@ try {
                             <h2 class="text-lg font-black text-slate-900">Audit Ledger</h2>
                             <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Real-time Verification Need</p>
                         </div>
-                        <button class="text-[10px] font-black bg-blue-600 text-white px-5 py-2 rounded-xl uppercase tracking-widest shadow-lg shadow-blue-500/20">View All Users</button>
+                        <a href="users_registry.php" class="text-[10px] font-black bg-blue-600 text-white px-5 py-2 rounded-xl uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-colors">
+                            View All Users
+                        </a>
                     </div>
                     
                     <div class="overflow-x-auto">

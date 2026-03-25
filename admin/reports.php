@@ -2,8 +2,8 @@
 /**
  * PROJECT: SkillLink - The Professional Marketplace
  * FILE: admin/reports.php
- * VERSION: 1.1 "The Strategic Architect - Fix 1"
- * FOCUS: PHP 8.2 Compatibility & SQL NULL Handling.
+ * VERSION: 2.0 "The Strategic Architect"
+ * FOCUS: Marketplace health monitoring and surgical PDF audit exports.
  */
 
 session_start();
@@ -26,7 +26,6 @@ $stats = ['total_revenue' => 0, 'success_rate' => 0, 'avg_rating' => 0, 'active_
  */
 try {
     // TIER 1: Marketplace Health HUD
-    // Summing budget from tasks table
     $revenue_query = $conn->query("SELECT SUM(budget) FROM tasks WHERE status IN ('completed', 'finalized')");
     $stats['total_revenue'] = (float)($revenue_query->fetch_row()[0] ?? 0);
 
@@ -38,7 +37,6 @@ try {
     $stats['active_tasks'] = (int)($conn->query("SELECT COUNT(*) FROM tasks WHERE status IN ('open', 'assigned', 'in_progress')")->fetch_row()[0] ?? 0);
 
     // TIER 2: Category Intelligence (Ranked by Economic Volume)
-    // FIX: Using COALESCE to prevent NULL values from reaching number_format()
     $category_report = $conn->query("
         SELECT 
             c.cat_name, c.cat_icon,
@@ -103,9 +101,9 @@ try {
             <div class="h-4 w-[1px] bg-slate-200"></div>
             <h1 class="text-sm font-bold text-slate-500 uppercase tracking-widest">Command Center / <span class="text-slate-900">Intelligence Suite</span></h1>
         </div>
-        <button class="bg-blue-600 text-white text-[10px] font-black px-5 py-2 rounded-xl uppercase tracking-widest hover:bg-blue-700 transition-all">
-            <i class="fas fa-file-export mr-2"></i> Export Ledger
-        </button>
+        <a href="export_ledger_pdf.php" target="_blank" class="bg-blue-600 text-white text-[10px] font-black px-6 py-2.5 rounded-xl uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">
+            <i class="fas fa-file-export mr-2"></i> Export Ledger Report
+        </a>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
@@ -181,11 +179,14 @@ try {
                         </thead>
                         <tbody class="divide-y divide-slate-50">
                             <?php if ($category_report): ?>
-                                <?php while($row = $category_report->fetch_assoc()): ?>
+                                <?php while($row = $category_report->fetch_assoc()): 
+                                    // ICON FALLBACK PROTOCOL
+                                    $icon = !empty($row['cat_icon']) ? $row['cat_icon'] : (str_contains(strtolower($row['cat_name']), 'clean') ? 'fa-broom-ball' : 'fa-microchip');
+                                ?>
                                 <tr class="hover:bg-blue-50/30 transition-all">
                                     <td class="px-10 py-5 flex items-center gap-4">
                                         <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-blue-600 shadow-sm border border-slate-200">
-                                            <i class="fas <?= htmlspecialchars($row['cat_icon']) ?> text-[10px]"></i>
+                                            <i class="fas <?= htmlspecialchars($icon) ?> text-[10px]"></i>
                                         </div>
                                         <span class="text-sm font-extrabold text-slate-900"><?= htmlspecialchars($row['cat_name']) ?></span>
                                     </td>
