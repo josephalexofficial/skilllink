@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 18, 2026 at 10:27 PM
+-- Generation Time: Mar 26, 2026 at 09:01 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,12 +41,33 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `cat_name`, `cat_icon`, `sort_order`, `status`, `created_at`) VALUES
-(1, 'Plumbing', 'fa-faucet-drip', 1, 'hidden', '2026-03-05 14:56:05'),
+(1, 'Plumbing', 'fa-faucet-drip', 1, 'active', '2026-03-05 14:56:05'),
 (2, 'Electrical', 'fa-bolt-lightning', 2, 'active', '2026-03-05 14:56:05'),
 (3, 'Painting', 'fa-paint-roller', 3, 'active', '2026-03-05 14:56:05'),
 (4, 'Carpentry', 'fa-hammer', 4, 'active', '2026-03-05 14:56:05'),
 (5, 'Cleaning', 'fa-sparkles', 5, 'active', '2026-03-05 14:56:05'),
 (6, 'Appliances', 'fa-gears', 6, 'active', '2026-03-05 14:56:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `password_resets`
+--
+
+INSERT INTO `password_resets` (`id`, `email`, `token`, `expires_at`) VALUES
+(2, 'josephalex@gmail.com', '8d967fa5081544ad199b51a658901b6c9d0cdf0ad11b20c63be35322c3c9538c', '2026-03-26 07:01:39'),
+(3, 'kelvinkosma@gmail.com', 'b2c7c3c08e3075e43e0d1b93ea3229963b17d56354e7f77cfd98729c4225d467', '2026-03-26 07:09:48');
 
 -- --------------------------------------------------------
 
@@ -173,10 +194,10 @@ CREATE TABLE `worker_profiles` (
 --
 
 INSERT INTO `worker_profiles` (`profile_id`, `user_id`, `category_id`, `bio`, `profile_photo`, `onboarded_at`, `hourly_rate`, `service_radius`, `is_live`, `id_proof_path`, `is_verified`) VALUES
-(1, 2, 2, 'Certified Electrician Professional', 'pro_2_1772736276.jpg', '2026-03-05 15:25:39', 0.00, 10, 1, NULL, 1),
-(2, 11, 5, 'Certified Cleaner', 'default-pro.png', '2026-03-05 15:27:52', 0.00, 10, 1, NULL, 0),
+(1, 2, 2, 'Certified Electrician Professional', 'pro_2_1772736276.jpg', '2026-03-05 15:25:39', 0.00, 10, 1, 'id_2_1774451180.pdf', 1),
+(2, 11, 5, 'Certified Cleaner', 'default-pro.png', '2026-03-05 15:27:52', 0.00, 10, 1, NULL, 1),
 (3, 14, 4, 'Certified Carpenter', 'default-pro.png', '2026-03-05 16:20:25', 0.00, 10, 1, NULL, 0),
-(4, 13, 6, 'Certified in Appliances', 'pro_13_1772728203.jpg', '2026-03-05 16:30:03', 0.00, 10, 1, 'id_13_1772740899.pdf', 0),
+(4, 13, 6, 'Certified in Appliances', 'pro_13_1772728203.jpg', '2026-03-05 16:30:03', 0.00, 10, 1, 'id_13_1774451330.pdf', 0),
 (5, 12, 1, 'Professional Plumber', 'default-pro.png', '2026-03-05 16:36:46', 0.00, 10, 1, NULL, 0),
 (6, 19, 3, 'Proficient Painter', 'default-pro.png', '2026-03-05 16:41:13', 0.00, 10, 1, NULL, 0);
 
@@ -190,6 +211,14 @@ INSERT INTO `worker_profiles` (`profile_id`, `user_id`, `category_id`, `bio`, `p
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `cat_name` (`cat_name`);
+
+--
+-- Indexes for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `email` (`email`),
+  ADD KEY `token` (`token`);
 
 --
 -- Indexes for table `reviews`
@@ -233,6 +262,12 @@ ALTER TABLE `worker_profiles`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `reviews`

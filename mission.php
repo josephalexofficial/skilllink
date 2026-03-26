@@ -81,7 +81,7 @@ include $include_path . 'header.php';
             <div class="w-full lg:w-1/2 flex justify-center lg:justify-start">
                 <div class="relative group">
                     <div class="w-72 h-72 md:w-[28rem] md:h-[28rem] bg-slate-200 rounded-[4rem] border-8 border-white shadow-2xl overflow-hidden transform -rotate-2 group-hover:rotate-0 transition-transform duration-700">
-                        <img src="assets/img/alexjoseph.jpg" alt="Alex Joseph" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700">
+                        <img src="assets/img/alexjoseph1.jpg" alt="Alex Joseph" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700">
                     </div>
                     <div class="absolute -bottom-8 -right-8 w-28 h-28 bg-skill-blue rounded-[2.5rem] flex items-center justify-center text-white text-4xl shadow-2xl shadow-blue-500/40 transform rotate-12">
                         <i class="fas fa-code"></i>

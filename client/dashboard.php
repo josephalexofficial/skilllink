@@ -2,7 +2,7 @@
 /**
  * PROJECT: SkillLink - The Professional Marketplace
  * FILE: client/dashboard.php
- * PURPOSE: Elite Client Command Center - Active Task Engine & High-Fidelity UI
+ * VERSION: 2.1 "Elite Discovery Restoration"
  */
 
 session_start();
@@ -29,7 +29,7 @@ $active_tasks_query = $conn->query("SELECT t.*, c.cat_name
                                     AND t.status IN ('open', 'assigned', 'in_progress', 'completed')
                                     ORDER BY t.created_at DESC");
 
-// 4. SURGICAL UPDATE: Fetch Top Pros with Real-Time Average Ratings
+// 4. Fetch Top Pros with Real-Time Average Ratings
 $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name,
                             IFNULL((SELECT AVG(rating) FROM reviews WHERE worker_id = wp.user_id), 0) as avg_rating
                             FROM worker_profiles wp 
@@ -77,6 +77,22 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name,
         .hero-glass {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* SEARCH DROP-DOWN PROTOCOL */
+        #discoveryDropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            z-index: 100;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
         }
     </style>
 </head>
@@ -136,19 +152,24 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name,
 
             <section class="flex-1 overflow-y-auto p-12 custom-scroll bg-[#f1f5f9]/50 relative">
                 
-                <div class="hero-glass rounded-[3.5rem] p-12 mb-14 relative overflow-hidden shadow-2xl">
-                    <div class="absolute top-0 right-0 w-96 h-96 bg-skill-blue/10 rounded-full blur-[100px]"></div>
+                <div class="hero-glass rounded-[3.5rem] p-12 mb-14 relative shadow-2xl">
+                    <div class="absolute top-0 right-0 w-96 h-96 bg-skill-blue/10 rounded-full blur-[100px] pointer-events-none"></div>
                     <div class="relative z-10 flex flex-col lg:flex-row items-center gap-12">
                         <div class="flex-1 space-y-4">
                             <h2 class="text-4xl font-black text-white tracking-tight leading-tight">What expert do<br>you need today?</h2>
                             <p class="text-slate-400 font-bold text-sm tracking-wide">Match with verified professionals in your territory instantly.</p>
                         </div>
-                        <div class="flex-1 w-full group">
+                        <div class="flex-1 w-full group relative">
                             <div class="relative">
                                 <i class="fas fa-magnifying-glass absolute left-8 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-skill-blue transition-colors"></i>
-                                <input type="text" placeholder="Search for Electricians, Plumbers..." 
+                                <input type="text" id="expertDiscovery" 
+                                       oninput="handleDiscovery(this.value)"
+                                       placeholder="Search for Electricians, Plumbers..." 
                                        class="w-full bg-white/5 border border-white/10 rounded-[2rem] py-7 pl-20 pr-10 text-white font-bold placeholder:text-slate-600 focus:bg-white/10 focus:ring-4 focus:ring-skill-blue/20 outline-none transition-all">
                             </div>
+
+                            <div id="discoveryDropdown">
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -212,7 +233,6 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name,
 
                     <div class="space-y-8">
                         <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em] px-4">Top Rated Pros</h3>
-                        
                         <div class="space-y-5">
                             <?php while($pro = $pros_query->fetch_assoc()): ?>
                             <div class="bg-white elite-card p-6 rounded-[2.5rem] group hover:-translate-y-2 transition-all duration-500">
@@ -239,10 +259,33 @@ $pros_query = $conn->query("SELECT wp.*, u.full_name, c.cat_name,
                             <?php endwhile; ?>
                         </div>
                     </div>
-
                 </div>
             </section>
         </main>
     </div>
+
+    <script>
+        function handleDiscovery(val) {
+            const dropdown = document.getElementById('discoveryDropdown');
+            if (val.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            fetch(`search_query.php?query=${encodeURIComponent(val)}`)
+                .then(res => res.text())
+                .then(data => {
+                    dropdown.innerHTML = data;
+                    dropdown.style.display = 'block';
+                });
+        }
+
+        // Close on click outside
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('expertDiscovery').contains(e.target)) {
+                document.getElementById('discoveryDropdown').style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
